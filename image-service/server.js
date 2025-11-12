@@ -59,7 +59,6 @@ app.get('/images/:filename', (req, res) => {
 });
 
 app.post('/edit/:filename', authenticateToken, async (req, res) => {
-    const { text, x, y } = req.body;
     const filename = req.params.filename;
     const filePath = path.join(uploadDir, filename);
 
@@ -67,17 +66,40 @@ app.post('/edit/:filename', authenticateToken, async (req, res) => {
         return res.status(404).send('File not found.');
     }
 
-    if (!text || x === undefined || y === undefined) {
-        return res.status(400).send('Missing "text", "x", or "y" in body.');
-    }
-
     try {
         const image = await jimp.read(filePath);
         const font = await jimp.loadFont(jimp.FONT_SANS_32_BLACK);
 
-        image.print(font, parseInt(x), parseInt(y), text);
+        if (req.body.text && req.body.x !== undefined && req.body.y !== undefined) {
+            const { text, x, y } = req.body;
+            image.print(font, parseInt(x), parseInt(y), text);
 
-        await image.writeAsync(filePath);
+        } else if (req.body.actions && Array.isArray(req.body.actions)) {
+            const { actions } = req.body;
+
+            for (const action of actions) {
+                if (action.type === 'text') {
+                    const { text, x, y } = action;
+                    if (text && x !== undefined && y !== undefined) {
+                        image.print(font, parseInt(x), parseInt(y), text);
+                    }
+                } else if (action.type === 'draw') {
+                    const { points, color } = action;
+                    if (points && Array.isArray(points)) {
+                        const hexColor = jimp.cssColorToHex(color || '#000000'); // Svart som default
+                        for (const point of points) {
+                            if (point.x !== undefined && point.y !== undefined) {
+                                image.setPixelColor(hexColor, parseInt(point.x), parseInt(point.y));
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            return res.status(400).send('Missing "actions" array in body, or legacy "text", "x", "y" fields.');
+        }
+
+        await image.writeAsync(filePath); // Spara ändringarna
 
         res.status(200).send({
             message: 'Image edited successfully',
