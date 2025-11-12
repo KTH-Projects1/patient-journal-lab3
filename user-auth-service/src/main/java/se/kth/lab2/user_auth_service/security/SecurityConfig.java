@@ -46,7 +46,6 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
-                // LÄGG TILL DENNA RAD för att tala om för Spring att använda vår provider
                 .authenticationProvider(authenticationProvider())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize ->

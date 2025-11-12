@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: image-service-deployment
+  labels:
+    app: image-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: image-service
+  template:
+    metadata:
+      labels:
+        app: image-service
+    spec:
+      containers:
+        - name: image-service
+          image: image-service:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: JWT_SECRET
+              value: "EnMycketLangOchSakerHemligNyckelForHS512SomArMinst64TeckenLangForAttUndvikaDettaFel-DuKanHittaPaEnEgenOcksa"
+          volumeMounts:
+            - name: image-storage
+              mountPath: /usr/src/app/uploads
+      volumes:
+        - name: image-storage
+          persistentVolumeClaim:
+            claimName: image-service-pvc
