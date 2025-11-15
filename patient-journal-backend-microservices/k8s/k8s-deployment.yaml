@@ -35,6 +35,15 @@ spec:
                   key: password
             - name: SPRING_JPA_HIBERNATE_DDL_AUTO
               value: "update"
+            # TILLAGT: RabbitMQ configuration
+            - name: SPRING_RABBITMQ_HOST
+              value: "rabbitmq-service"
+            - name: SPRING_RABBITMQ_PORT
+              value: "5672"
+            - name: SPRING_RABBITMQ_USERNAME
+              value: "user"
+            - name: SPRING_RABBITMQ_PASSWORD
+              value: "password"
           resources:
             requests:
               memory: "512Mi"
@@ -43,18 +52,14 @@ spec:
               memory: "1Gi"
               cpu: "500m"
           livenessProbe:
-            httpGet:
-              path: /actuator/health
-              port: 8080
-            initialDelaySeconds: 60
-            periodSeconds: 10
+             httpGet:
+               path: /actuator/health
+               port: 8080
+             initialDelaySeconds: 60
+             periodSeconds: 10
           readinessProbe:
-            httpGet:
-              path: /actuator/health
-              port: 8080
-            initialDelaySeconds: 30
-            periodSeconds: 5
-
-
-
-
+             httpGet:
+               path: /actuator/health
+               port: 8080
+             initialDelaySeconds: 30
+             periodSeconds: 5

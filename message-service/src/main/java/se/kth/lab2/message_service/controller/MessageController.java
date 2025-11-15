@@ -41,4 +41,6 @@ public class MessageController {
         MessageDTO updatedMessage = messageService.markMessageAsRead(messageId);
         return ResponseEntity.ok(updatedMessage);
     }
+
+    
 }

@@ -1,0 +1,6 @@
+se\kth\lab2\message_service\controller\MessageController.class
+se\kth\lab2\message_service\service\MessageService.class
+se\kth\lab2\message_service\repository\MessageRepository.class
+se\kth\lab2\message_service\entity\Message.class
+se\kth\lab2\message_service\MessageServiceApplication.class
+se\kth\lab2\message_service\dto\MessageDTO.class
