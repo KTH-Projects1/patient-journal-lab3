@@ -1,6 +1,7 @@
 package se.kth.lab2.service;
 
-import import io.smallrye.reactive.messaging.annotations.Blocking;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.smallrye.reactive.messaging.annotations.Blocking;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
@@ -15,13 +16,12 @@ public class PatientSearchConsumer {
     @Incoming("patient-events")
     @Blocking
     @Transactional
-    public void consumePatientEvent(PatientDTO patient) {
-        System.out.println("=== Kafka: Mottog patient-händelse: " + patient.firstName + " " + patient.lastName);
+    public void consumePatientEvent(String json) {
         try {
+            ObjectMapper mapper = new ObjectMapper();
+            PatientDTO patient = mapper.readValue(json, PatientDTO.class);
             PatientSearchEntry.addOrUpdate(patient);
-            System.out.println("=== Kafka: Patient-händelse bearbetad framgångsrikt");
         } catch (Exception e) {
-            System.err.println("=== Kafka: Fel vid bearbetning av patient-händelse: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -51,7 +51,4 @@ public class PatientSearchConsumer {
             e.printStackTrace();
         }
     }
-}
-
-
 }
