@@ -1,5 +1,6 @@
 package se.kth.lab2.resource;
 
+import io.smallrye.mutiny.Uni;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -16,7 +17,7 @@ public class SearchResource {
 
     @GET
     @Path("/patients")
-    public List<PatientSearchEntry> searchPatients(@QueryParam("query") String query) {
+    public Uni<List<PatientSearchEntry>> searchPatients(@QueryParam("query") String query) {
         if (query == null || query.trim().isEmpty()) {
             return PatientSearchEntry.listAll();
         }
@@ -31,7 +32,7 @@ public class SearchResource {
 
     @GET
     @Path("/patients/by-name")
-    public List<PatientSearchEntry> searchPatientsByName(
+    public Uni<List<PatientSearchEntry>> searchPatientsByName(
             @QueryParam("firstName") String firstName,
             @QueryParam("lastName") String lastName) {
 
@@ -64,9 +65,9 @@ public class SearchResource {
 
     @GET
     @Path("/patients/by-condition")
-    public List<PatientSearchEntry> searchPatientsByCondition(@QueryParam("condition") String condition) {
+    public Uni<List<PatientSearchEntry>> searchPatientsByCondition(@QueryParam("condition") String condition) {
         if (condition == null || condition.trim().isEmpty()) {
-            return List.of();
+            return Uni.createFrom().item(List.of());
         }
 
         String likeQuery = "%" + condition.toLowerCase() + "%";
@@ -75,9 +76,9 @@ public class SearchResource {
 
     @GET
     @Path("/patients/by-personal-number")
-    public List<PatientSearchEntry> searchPatientsByPersonalNumber(@QueryParam("personalNumber") String personalNumber) {
+    public Uni<List<PatientSearchEntry>> searchPatientsByPersonalNumber(@QueryParam("personalNumber") String personalNumber) {
         if (personalNumber == null || personalNumber.trim().isEmpty()) {
-            return List.of();
+            return Uni.createFrom().item(List.of());
         }
 
         return PatientSearchEntry.list("personalNumber LIKE ?1", "%" + personalNumber + "%");
@@ -85,7 +86,7 @@ public class SearchResource {
 
     @GET
     @Path("/journals")
-    public List<JournalSearchEntry> searchJournals(@QueryParam("query") String query) {
+    public Uni<List<JournalSearchEntry>> searchJournals(@QueryParam("query") String query) {
         if (query == null || query.trim().isEmpty()) {
             return JournalSearchEntry.listAll();
         }
@@ -96,9 +97,9 @@ public class SearchResource {
 
     @GET
     @Path("/journals/by-patient")
-    public List<JournalSearchEntry> searchJournalsByPatient(@QueryParam("patientId") Long patientId) {
+    public Uni<List<JournalSearchEntry>> searchJournalsByPatient(@QueryParam("patientId") Long patientId) {
         if (patientId == null) {
-            return List.of();
+            return Uni.createFrom().item(List.of());
         }
 
         return JournalSearchEntry.list("originalPatientId", patientId);
@@ -107,6 +108,6 @@ public class SearchResource {
     @GET
     @Path("/health")
     public String health() {
-        return "Search service is running with Kafka";
+        return "Search service is running with Kafka (Non-blocking)";
     }
 }

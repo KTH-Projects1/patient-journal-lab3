@@ -2,6 +2,7 @@ package se.kth.lab2.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PatientDTO {
@@ -22,6 +23,7 @@ public class PatientDTO {
     public String email;
 
     @JsonProperty("dateOfBirth")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     public String dateOfBirth;
 
     @JsonProperty("phoneNumber")

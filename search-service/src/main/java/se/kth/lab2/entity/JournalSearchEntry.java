@@ -1,6 +1,7 @@
 package se.kth.lab2.entity;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import io.quarkus.hibernate.reactive.panache.PanacheEntity;
+import io.smallrye.mutiny.Uni;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import se.kth.lab2.dto.JournalEntryDTO;
@@ -20,30 +21,33 @@ public class JournalSearchEntry extends PanacheEntity {
     @Column(columnDefinition = "TEXT")
     public String searchContent;
 
-    public static void addOrUpdate(JournalEntryDTO dto) {
-        JournalSearchEntry entry = find("originalJournalId", dto.id).firstResult();
-        if (entry == null) {
-            entry = new JournalSearchEntry();
-            entry.originalJournalId = dto.id;
-        }
+    public static Uni<Void> addOrUpdateReactive(JournalEntryDTO dto) {
+        return JournalSearchEntry.<JournalSearchEntry>find("originalJournalId", dto.id)
+                .firstResult()
+                .onItem().transformToUni(result -> {
+                    JournalSearchEntry entry = result;
+                    if (entry == null) {
+                        entry = new JournalSearchEntry();
+                        entry.originalJournalId = dto.id;
+                    }
 
-        entry.originalPatientId = dto.patientId;
-        entry.note = dto.note;
-        entry.diagnosis = dto.diagnosis;
-        entry.treatment = dto.treatment;
-        entry.createdAt = dto.createdAt;
+                    entry.originalPatientId = dto.patientId;
+                    entry.note = dto.note;
+                    entry.diagnosis = dto.diagnosis;
+                    entry.treatment = dto.treatment;
+                    entry.createdAt = dto.createdAt;
 
-        // Build searchable content
-        StringBuilder searchContent = new StringBuilder();
-        appendIfNotNull(searchContent, dto.note);
-        appendIfNotNull(searchContent, dto.diagnosis);
-        appendIfNotNull(searchContent, dto.treatment);
+                    StringBuilder searchContent = new StringBuilder();
+                    appendIfNotNull(searchContent, dto.note);
+                    appendIfNotNull(searchContent, dto.diagnosis);
+                    appendIfNotNull(searchContent, dto.treatment);
 
-        entry.searchContent = searchContent.toString().toLowerCase();
+                    entry.searchContent = searchContent.toString().toLowerCase();
 
-        entry.persist();
+                    System.out.println("Uppdaterade journal search entry för patient: " + dto.patientId);
 
-        System.out.println("Uppdaterade journal search entry för patient: " + dto.patientId);
+                    return entry.persistAndFlush().replaceWithVoid();
+                });
     }
 
     private static void appendIfNotNull(StringBuilder sb, String value) {
@@ -55,5 +59,3 @@ public class JournalSearchEntry extends PanacheEntity {
         }
     }
 }
-
-

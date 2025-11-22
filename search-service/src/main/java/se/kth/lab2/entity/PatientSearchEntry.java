@@ -1,6 +1,7 @@
 package se.kth.lab2.entity;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import io.quarkus.hibernate.reactive.panache.PanacheEntity;
+import io.smallrye.mutiny.Uni;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import se.kth.lab2.dto.PatientDTO;
@@ -28,71 +29,80 @@ public class PatientSearchEntry extends PanacheEntity {
     @Column(columnDefinition = "TEXT")
     public String conditionsData;
 
-    public static void addOrUpdate(PatientDTO dto) {
-        PatientSearchEntry entry = find("originalPatientId", dto.id).firstResult();
-        if (entry == null) {
-            entry = new PatientSearchEntry();
-            entry.originalPatientId = dto.id;
-            entry.journalSearchData = "";
-            entry.conditionsData = "";
-        }
+    public static Uni<Void> addOrUpdateReactive(PatientDTO dto) {
+        return PatientSearchEntry.<PatientSearchEntry>find("originalPatientId", dto.id)
+                .firstResult()
+                .onItem().transformToUni(result -> {
+                    PatientSearchEntry entry = result;
+                    if (entry == null) {
+                        entry = new PatientSearchEntry();
+                        entry.originalPatientId = dto.id;
+                        entry.journalSearchData = "";
+                        entry.conditionsData = "";
+                    }
 
-        entry.firstName = dto.firstName;
-        entry.lastName = dto.lastName;
-        entry.personalNumber = dto.personalNumber;
-        entry.email = dto.email;
-        entry.phoneNumber = dto.phoneNumber;
-        entry.address = dto.address;
-        entry.dateOfBirth = dto.dateOfBirth;
+                    entry.firstName = dto.firstName;
+                    entry.lastName = dto.lastName;
+                    entry.personalNumber = dto.personalNumber;
+                    entry.email = dto.email;
+                    entry.phoneNumber = dto.phoneNumber;
+                    entry.address = dto.address;
+                    entry.dateOfBirth = dto.dateOfBirth;
 
-        // Build searchable data string
-        StringBuilder searchData = new StringBuilder();
-        appendIfNotNull(searchData, dto.firstName);
-        appendIfNotNull(searchData, dto.lastName);
-        appendIfNotNull(searchData, dto.personalNumber);
-        appendIfNotNull(searchData, dto.email);
-        appendIfNotNull(searchData, dto.phoneNumber);
-        appendIfNotNull(searchData, dto.address);
+                    StringBuilder searchData = new StringBuilder();
+                    appendIfNotNull(searchData, dto.firstName);
+                    appendIfNotNull(searchData, dto.lastName);
+                    appendIfNotNull(searchData, dto.personalNumber);
+                    appendIfNotNull(searchData, dto.email);
+                    appendIfNotNull(searchData, dto.phoneNumber);
+                    appendIfNotNull(searchData, dto.address);
 
-        entry.patientSearchData = searchData.toString().toLowerCase();
+                    entry.patientSearchData = searchData.toString().toLowerCase();
 
-        entry.persist();
+                    System.out.println("Uppdaterade patient search entry för: " + dto.firstName + " " + dto.lastName);
 
-        System.out.println("Uppdaterade patient search entry för: " + dto.firstName + " " + dto.lastName);
+                    return entry.persistAndFlush().replaceWithVoid();
+                });
     }
 
-    public static void appendJournalContent(Long patientId, String content) {
-        PatientSearchEntry entry = find("originalPatientId", patientId).firstResult();
-        if (entry != null) {
-            if (entry.journalSearchData == null) {
-                entry.journalSearchData = "";
-            }
+    public static Uni<Void> appendJournalContentReactive(Long patientId, String content) {
+        return PatientSearchEntry.<PatientSearchEntry>find("originalPatientId", patientId)
+                .firstResult()
+                .onItem().transformToUni(entry -> {
+                    if (entry != null) {
+                        if (entry.journalSearchData == null) {
+                            entry.journalSearchData = "";
+                        }
 
-            String newContentLower = content.toLowerCase();
-            if (!entry.journalSearchData.contains(newContentLower)) {
-                entry.journalSearchData = entry.journalSearchData + " " + newContentLower;
-                entry.persist();
-                System.out.println("Lade till journalinnehåll för patient: " + patientId);
-            }
-        } else {
-            System.err.println("Kunde inte hitta patient " + patientId + " för att lägga till journaltext.");
-        }
+                        String newContentLower = content.toLowerCase();
+                        if (!entry.journalSearchData.contains(newContentLower)) {
+                            entry.journalSearchData = entry.journalSearchData + " " + newContentLower;
+                            System.out.println("Lade till journalinnehåll för patient: " + patientId);
+                            return entry.persistAndFlush().replaceWithVoid();
+                        }
+                    }
+                    return Uni.createFrom().voidItem();
+                });
     }
 
-    public static void appendCondition(Long patientId, String condition) {
-        PatientSearchEntry entry = find("originalPatientId", patientId).firstResult();
-        if (entry != null) {
-            if (entry.conditionsData == null) {
-                entry.conditionsData = "";
-            }
+    public static Uni<Void> appendConditionReactive(Long patientId, String condition) {
+        return PatientSearchEntry.<PatientSearchEntry>find("originalPatientId", patientId)
+                .firstResult()
+                .onItem().transformToUni(entry -> {
+                    if (entry != null) {
+                        if (entry.conditionsData == null) {
+                            entry.conditionsData = "";
+                        }
 
-            String conditionLower = condition.toLowerCase();
-            if (!entry.conditionsData.contains(conditionLower)) {
-                entry.conditionsData = entry.conditionsData + " " + conditionLower;
-                entry.persist();
-                System.out.println("Lade till condition för patient: " + patientId);
-            }
-        }
+                        String conditionLower = condition.toLowerCase();
+                        if (!entry.conditionsData.contains(conditionLower)) {
+                            entry.conditionsData = entry.conditionsData + " " + conditionLower;
+                            System.out.println("Lade till condition för patient: " + patientId);
+                            return entry.persistAndFlush().replaceWithVoid();
+                        }
+                    }
+                    return Uni.createFrom().voidItem();
+                });
     }
 
     private static void appendIfNotNull(StringBuilder sb, String value) {
