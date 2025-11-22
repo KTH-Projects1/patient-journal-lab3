@@ -7,6 +7,7 @@ import se.kth.lab2.message_service.dto.MessageDTO;
 import se.kth.lab2.message_service.entity.Message;
 import se.kth.lab2.message_service.repository.MessageRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,6 +20,10 @@ public class MessageService {
 
     public MessageDTO sendMessage(MessageDTO messageDTO) {
         Message message = convertToEntity(messageDTO);
+
+        message.setId(null);
+        message.setCreatedAt(LocalDateTime.now());
+        message.setRead(false);
 
         if (message.getConversationId() == null) {
             Message savedMessage = messageRepository.save(message);
@@ -41,7 +46,6 @@ public class MessageService {
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
-
     public MessageDTO markMessageAsRead(Long messageId) {
         Message message = messageRepository.findById(messageId)
                 .orElseThrow(() -> new RuntimeException("Meddelande med ID " + messageId + " finns inte"));
@@ -49,6 +53,7 @@ public class MessageService {
         Message updatedMessage = messageRepository.save(message);
         return convertToDTO(updatedMessage);
     }
+
 
     private MessageDTO convertToDTO(Message entity) {
         return new MessageDTO(
@@ -71,10 +76,8 @@ public class MessageService {
                 dto.getSubject(),
                 dto.getContent(),
                 dto.getCreatedAt(),
-                dto.isRead(),
+                dto.isRead(),       
                 dto.getConversationId()
         );
     }
-
-
 }

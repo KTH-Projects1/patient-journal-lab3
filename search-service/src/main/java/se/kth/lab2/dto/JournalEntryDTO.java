@@ -1,17 +1,28 @@
 package se.kth.lab2.dto;
 
-import java.time.LocalDate;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class JournalEntryDTO {
 
+    @JsonProperty("id")
     public Long id;
-    public LocalDate date;
-    public String time;
-    public String content;
+
+    @JsonProperty("patientId")
     public Long patientId;
-    public String doctorName;
-    public String patientName;
+
+    @JsonProperty("note")
+    public String note;
+
+    @JsonProperty("createdAt")
+    public String createdAt;
+
+    @JsonProperty("diagnosis")
+    public String diagnosis;
+
+    @JsonProperty("treatment")
+    public String treatment;
 
     public JournalEntryDTO() {
     }

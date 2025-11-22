@@ -1,10 +1,10 @@
 package se.kth.lab2.patient_journal_backend_microservices.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import se.kth.lab2.patient_journal_backend_microservices.config.RabbitMQConfig;
 import se.kth.lab2.patient_journal_backend_microservices.dto.PatientDTO;
 import se.kth.lab2.patient_journal_backend_microservices.entity.Patient;
 import se.kth.lab2.patient_journal_backend_microservices.repository.PatientRepository;
@@ -18,7 +18,10 @@ import java.util.stream.Collectors;
 public class PatientService {
 
     private final PatientRepository patientRepository;
-    private final RabbitTemplate rabbitTemplate;
+    private final KafkaTemplate<String, PatientDTO> kafkaTemplate;
+
+    @Value("${kafka.topic.patient}")
+    private String patientTopic;
 
     public PatientDTO createPatient(PatientDTO patientDTO) {
         if (patientRepository.existsByPersonalNumber(patientDTO.getPersonalNumber())) {
@@ -29,7 +32,10 @@ public class PatientService {
         Patient savedPatient = patientRepository.save(patient);
         PatientDTO dto = convertToDTO(savedPatient);
 
-        rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY_PATIENT, dto);
+        // Send event to Kafka
+        kafkaTemplate.send(patientTopic, dto.getId().toString(), dto);
+        System.out.println("=== Kafka: Skickade patient-händelse till topic: " + patientTopic);
+
         return dto;
     }
 
@@ -57,7 +63,13 @@ public class PatientService {
         patient.setAddress(patientDTO.getAddress());
 
         Patient updatedPatient = patientRepository.save(patient);
-        return convertToDTO(updatedPatient);
+        PatientDTO dto = convertToDTO(updatedPatient);
+
+        // Send update event to Kafka
+        kafkaTemplate.send(patientTopic, dto.getId().toString(), dto);
+        System.out.println("=== Kafka: Skickade patient-uppdaterings-händelse till topic: " + patientTopic);
+
+        return dto;
     }
 
     public void deletePatient(Long id) {

@@ -5,13 +5,10 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-import se.kth.lab2.entity.EncounterSearchEntry;
 import se.kth.lab2.entity.PatientSearchEntry;
+import se.kth.lab2.entity.JournalSearchEntry;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.List;
-import java.util.Map;
 
 @Path("/api/search")
 @Produces(MediaType.APPLICATION_JSON)
@@ -27,39 +24,89 @@ public class SearchResource {
         String likeQuery = "%" + query.toLowerCase() + "%";
 
         return PatientSearchEntry.list(
-                "patientSearchData LIKE ?1 OR journalSearchData LIKE ?1",
+                "patientSearchData LIKE ?1 OR journalSearchData LIKE ?1 OR conditionsData LIKE ?1",
                 likeQuery
         );
     }
 
     @GET
-    @Path("/doctors/patients")
-    public List<PatientSearchEntry> searchPatientsByDoctor(@QueryParam("doctorId") Long doctorId) {
-        if (doctorId == null) {
-            return List.of();
+    @Path("/patients/by-name")
+    public List<PatientSearchEntry> searchPatientsByName(
+            @QueryParam("firstName") String firstName,
+            @QueryParam("lastName") String lastName) {
+
+        if ((firstName == null || firstName.trim().isEmpty()) &&
+                (lastName == null || lastName.trim().isEmpty())) {
+            return PatientSearchEntry.listAll();
         }
-        return PatientSearchEntry.list("originalDoctorId", doctorId);
+
+        StringBuilder query = new StringBuilder();
+        if (firstName != null && !firstName.trim().isEmpty()) {
+            query.append("LOWER(firstName) LIKE :firstName");
+        }
+        if (lastName != null && !lastName.trim().isEmpty()) {
+            if (query.length() > 0) {
+                query.append(" AND ");
+            }
+            query.append("LOWER(lastName) LIKE :lastName");
+        }
+
+        io.quarkus.panache.common.Parameters params = new io.quarkus.panache.common.Parameters();
+        if (firstName != null && !firstName.trim().isEmpty()) {
+            params = params.and("firstName", "%" + firstName.toLowerCase() + "%");
+        }
+        if (lastName != null && !lastName.trim().isEmpty()) {
+            params = params.and("lastName", "%" + lastName.toLowerCase() + "%");
+        }
+
+        return PatientSearchEntry.list(query.toString(), params);
     }
 
     @GET
-    @Path("/doctors/encounters")
-    public List<EncounterSearchEntry> searchEncountersByDoctorAndDate(
-            @QueryParam("doctorId") Long doctorId,
-            @QueryParam("date") String dateString) {
-
-        if (doctorId == null || dateString == null || dateString.trim().isEmpty()) {
+    @Path("/patients/by-condition")
+    public List<PatientSearchEntry> searchPatientsByCondition(@QueryParam("condition") String condition) {
+        if (condition == null || condition.trim().isEmpty()) {
             return List.of();
         }
 
-        try {
-            LocalDate date = LocalDate.parse(dateString);
+        String likeQuery = "%" + condition.toLowerCase() + "%";
+        return PatientSearchEntry.list("conditionsData LIKE ?1", likeQuery);
+    }
 
-            return EncounterSearchEntry.list(
-                    "originalDoctorId = :doctorId AND encounterDate = :date",
-                    Map.of("doctorId", doctorId, "date", date)
-            );
-        } catch (DateTimeParseException e) {
+    @GET
+    @Path("/patients/by-personal-number")
+    public List<PatientSearchEntry> searchPatientsByPersonalNumber(@QueryParam("personalNumber") String personalNumber) {
+        if (personalNumber == null || personalNumber.trim().isEmpty()) {
             return List.of();
         }
+
+        return PatientSearchEntry.list("personalNumber LIKE ?1", "%" + personalNumber + "%");
+    }
+
+    @GET
+    @Path("/journals")
+    public List<JournalSearchEntry> searchJournals(@QueryParam("query") String query) {
+        if (query == null || query.trim().isEmpty()) {
+            return JournalSearchEntry.listAll();
+        }
+
+        String likeQuery = "%" + query.toLowerCase() + "%";
+        return JournalSearchEntry.list("searchContent LIKE ?1", likeQuery);
+    }
+
+    @GET
+    @Path("/journals/by-patient")
+    public List<JournalSearchEntry> searchJournalsByPatient(@QueryParam("patientId") Long patientId) {
+        if (patientId == null) {
+            return List.of();
+        }
+
+        return JournalSearchEntry.list("originalPatientId", patientId);
+    }
+
+    @GET
+    @Path("/health")
+    public String health() {
+        return "Search service is running with Kafka";
     }
 }

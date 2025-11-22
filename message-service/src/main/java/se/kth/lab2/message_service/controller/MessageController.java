@@ -36,11 +36,10 @@ public class MessageController {
         return ResponseEntity.ok(conversation);
     }
 
+
     @PutMapping("/{messageId}/read")
     public ResponseEntity<MessageDTO> markAsRead(@PathVariable Long messageId) {
         MessageDTO updatedMessage = messageService.markMessageAsRead(messageId);
         return ResponseEntity.ok(updatedMessage);
     }
-
-    
 }
