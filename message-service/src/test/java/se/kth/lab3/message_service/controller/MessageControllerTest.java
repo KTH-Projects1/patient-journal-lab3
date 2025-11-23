@@ -54,10 +54,8 @@ class MessageControllerTest {
 
     @Test
     void testSendMessage_Success() throws Exception {
-        // Arrange
         when(messageService.sendMessage(any(MessageDTO.class))).thenReturn(testMessageDTO);
 
-        // Act & Assert
         mockMvc.perform(post("/api/messages")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(testMessageDTO)))
@@ -75,13 +73,11 @@ class MessageControllerTest {
 
     @Test
     void testSendMessage_InvalidData_ReturnsBadRequest() throws Exception {
-        // Arrange - Message utan senderId
         MessageDTO invalidMessage = new MessageDTO(
                 null, null, "doctor2", "Subject", "Content",
                 LocalDateTime.now(), false, null
         );
 
-        // Act & Assert
         mockMvc.perform(post("/api/messages")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidMessage)))
@@ -92,7 +88,6 @@ class MessageControllerTest {
 
     @Test
     void testGetInbox_Success() throws Exception {
-        // Arrange
         MessageDTO message2 = new MessageDTO(
                 2L, "doctor3", "doctor2", "Akut fall",
                 "Behöver hjälp!", LocalDateTime.now(), false, 2L
@@ -101,7 +96,6 @@ class MessageControllerTest {
         List<MessageDTO> inbox = Arrays.asList(testMessageDTO, message2);
         when(messageService.getInboxForUser("doctor2")).thenReturn(inbox);
 
-        // Act & Assert
         mockMvc.perform(get("/api/messages/inbox/doctor2"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
@@ -113,10 +107,8 @@ class MessageControllerTest {
 
     @Test
     void testGetInbox_EmptyInbox() throws Exception {
-        // Arrange
         when(messageService.getInboxForUser("doctor5")).thenReturn(Arrays.asList());
 
-        // Act & Assert
         mockMvc.perform(get("/api/messages/inbox/doctor5"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(0)));
@@ -126,7 +118,6 @@ class MessageControllerTest {
 
     @Test
     void testGetConversation_Success() throws Exception {
-        // Arrange
         MessageDTO reply = new MessageDTO(
                 2L, "doctor2", "doctor1", "Re: Patientkonsultation",
                 "Ja!", LocalDateTime.now(), false, 1L
@@ -135,7 +126,6 @@ class MessageControllerTest {
         List<MessageDTO> conversation = Arrays.asList(testMessageDTO, reply);
         when(messageService.getConversation(1L)).thenReturn(conversation);
 
-        // Act & Assert
         mockMvc.perform(get("/api/messages/conversation/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
@@ -147,7 +137,6 @@ class MessageControllerTest {
 
     @Test
     void testMarkAsRead_Success() throws Exception {
-        // Arrange
         MessageDTO readMessage = new MessageDTO(
                 1L, "doctor1", "doctor2", "Patientkonsultation",
                 "Kan du titta på patient 123?", LocalDateTime.now(), true, 1L
@@ -155,7 +144,6 @@ class MessageControllerTest {
 
         when(messageService.markMessageAsRead(1L)).thenReturn(readMessage);
 
-        // Act & Assert
         mockMvc.perform(put("/api/messages/1/read"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
@@ -166,11 +154,9 @@ class MessageControllerTest {
 
     @Test
     void testMarkAsRead_NotFound() throws Exception {
-        // Arrange
         when(messageService.markMessageAsRead(999L))
                 .thenThrow(new RuntimeException("Meddelande med ID 999 finns inte"));
 
-        // Act & Assert
         mockMvc.perform(put("/api/messages/999/read"))
                 .andExpect(status().isNotFound());  // Ändrat från isInternalServerError
 

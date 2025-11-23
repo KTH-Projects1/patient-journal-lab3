@@ -48,7 +48,6 @@ class JournalEntryControllerTest {
         );
     }
 
-    // ... Resten av testerna förblir samma
     @Test
     void testCreateJournalEntry_Success() throws Exception {
         when(journalEntryService.createJournalEntry(any(JournalEntryDTO.class)))
@@ -67,5 +66,4 @@ class JournalEntryControllerTest {
         verify(journalEntryService).createJournalEntry(any(JournalEntryDTO.class));
     }
 
-    // ... (kopiera alla andra tester från tidigare)
 }

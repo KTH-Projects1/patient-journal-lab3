@@ -19,7 +19,6 @@ public class SearchResourceTest {
 
     @Test
     public void testSearchPatientsEndpointExists() {
-        // Bara testa att endpoint finns, acceptera 200 eller 500
         given()
                 .when()
                 .queryParam("query", "test")

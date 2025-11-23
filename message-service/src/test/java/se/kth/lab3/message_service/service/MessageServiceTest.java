@@ -59,7 +59,6 @@ class MessageServiceTest {
 
     @Test
     void testSendMessage_NewConversation_Success() {
-        // Arrange
         MessageDTO newMessageDTO = new MessageDTO(
                 null, "doctor1", "doctor2", "Ny konsultation",
                 "Hej!", null, false, null
@@ -79,10 +78,8 @@ class MessageServiceTest {
                 .thenReturn(savedMessage)
                 .thenReturn(finalMessage);
 
-        // Act
         MessageDTO result = messageService.sendMessage(newMessageDTO);
 
-        // Assert
         assertNotNull(result);
         assertEquals("doctor1", result.getSenderId());
         assertEquals("doctor2", result.getRecipientId());
@@ -95,7 +92,6 @@ class MessageServiceTest {
 
     @Test
     void testSendMessage_ExistingConversation_Success() {
-        // Arrange
         MessageDTO replyDTO = new MessageDTO(
                 null, "doctor2", "doctor1", "Re: Patientkonsultation",
                 "Ja, jag tittar på det!", null, false, 1L
@@ -108,10 +104,8 @@ class MessageServiceTest {
 
         when(messageRepository.save(any(Message.class))).thenReturn(savedMessage);
 
-        // Act
         MessageDTO result = messageService.sendMessage(replyDTO);
 
-        // Assert
         assertNotNull(result);
         assertEquals(1L, result.getConversationId());
         assertEquals("doctor2", result.getSenderId());
@@ -120,7 +114,6 @@ class MessageServiceTest {
 
     @Test
     void testGetInboxForUser_Success() {
-        // Arrange
         Message message2 = new Message(
                 2L, "doctor3", "doctor2", "Akut fall",
                 "Behöver hjälp nu!", LocalDateTime.now(), false, 2L
@@ -129,10 +122,8 @@ class MessageServiceTest {
         when(messageRepository.findByRecipientIdOrderByCreatedAtDesc("doctor2"))
                 .thenReturn(Arrays.asList(testMessage, message2));
 
-        // Act
         List<MessageDTO> inbox = messageService.getInboxForUser("doctor2");
 
-        // Assert
         assertNotNull(inbox);
         assertEquals(2, inbox.size());
         assertEquals("doctor1", inbox.get(0).getSenderId());
@@ -143,14 +134,11 @@ class MessageServiceTest {
 
     @Test
     void testGetInboxForUser_EmptyInbox() {
-        // Arrange
         when(messageRepository.findByRecipientIdOrderByCreatedAtDesc("doctor5"))
                 .thenReturn(Arrays.asList());
 
-        // Act
         List<MessageDTO> inbox = messageService.getInboxForUser("doctor5");
 
-        // Assert
         assertNotNull(inbox);
         assertEquals(0, inbox.size());
 
@@ -159,7 +147,6 @@ class MessageServiceTest {
 
     @Test
     void testGetConversation_Success() {
-        // Arrange
         Message reply = new Message(
                 2L, "doctor2", "doctor1", "Re: Patientkonsultation",
                 "Ja, jag tittar!", LocalDateTime.now().plusMinutes(5), false, 1L
@@ -168,10 +155,8 @@ class MessageServiceTest {
         when(messageRepository.findByConversationIdOrderByCreatedAtAsc(1L))
                 .thenReturn(Arrays.asList(testMessage, reply));
 
-        // Act
         List<MessageDTO> conversation = messageService.getConversation(1L);
 
-        // Assert
         assertNotNull(conversation);
         assertEquals(2, conversation.size());
         assertEquals("doctor1", conversation.get(0).getSenderId());
@@ -183,7 +168,6 @@ class MessageServiceTest {
 
     @Test
     void testMarkMessageAsRead_Success() {
-        // Arrange
         when(messageRepository.findById(1L)).thenReturn(Optional.of(testMessage));
 
         Message updatedMessage = new Message(
@@ -193,10 +177,8 @@ class MessageServiceTest {
 
         when(messageRepository.save(any(Message.class))).thenReturn(updatedMessage);
 
-        // Act
         MessageDTO result = messageService.markMessageAsRead(1L);
 
-        // Assert
         assertNotNull(result);
         assertTrue(result.isRead());
 
@@ -206,10 +188,8 @@ class MessageServiceTest {
 
     @Test
     void testMarkMessageAsRead_NotFound_ThrowsException() {
-        // Arrange
         when(messageRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             messageService.markMessageAsRead(999L);
         });

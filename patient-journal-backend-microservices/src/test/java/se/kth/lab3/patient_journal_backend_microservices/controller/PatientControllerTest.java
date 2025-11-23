@@ -55,10 +55,8 @@ class PatientControllerTest {
 
     @Test
     void testCreatePatient_Success() throws Exception {
-        // Arrange
         when(patientService.createPatient(any(PatientDTO.class))).thenReturn(testPatientDTO);
 
-        // Act & Assert
         mockMvc.perform(post("/api/patients")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(testPatientDTO)))
@@ -74,14 +72,12 @@ class PatientControllerTest {
 
     @Test
     void testCreatePatient_InvalidData_ReturnsBadRequest() throws Exception {
-        // Arrange - Patient utan firstName
         PatientDTO invalidPatient = new PatientDTO(
                 null, null, "Andersson", "19900101-1234",
                 LocalDate.of(1990, 1, 1), "anna@example.com",
                 "0701234567", "Testgatan 1"
         );
 
-        // Act & Assert
         mockMvc.perform(post("/api/patients")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidPatient)))
@@ -92,10 +88,8 @@ class PatientControllerTest {
 
     @Test
     void testGetPatientById_Success() throws Exception {
-        // Arrange
         when(patientService.getPatientById(1L)).thenReturn(testPatientDTO);
 
-        // Act & Assert
         mockMvc.perform(get("/api/patients/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
@@ -107,11 +101,8 @@ class PatientControllerTest {
 
     @Test
     void testGetPatientById_NotFound() throws Exception {
-        // Arrange
         when(patientService.getPatientById(999L))
                 .thenThrow(new RuntimeException("Patient med ID 999 finns inte"));
-
-        // Act & Assert
         mockMvc.perform(get("/api/patients/999"))
                 .andExpect(status().isNotFound());
 
@@ -120,7 +111,6 @@ class PatientControllerTest {
 
     @Test
     void testGetAllPatients_Success() throws Exception {
-        // Arrange
         PatientDTO patient2 = new PatientDTO(
                 2L, "Erik", "Eriksson", "19850505-5678",
                 LocalDate.of(1985, 5, 5), "erik@example.com",
@@ -130,7 +120,6 @@ class PatientControllerTest {
         List<PatientDTO> patients = Arrays.asList(testPatientDTO, patient2);
         when(patientService.getAllPatients()).thenReturn(patients);
 
-        // Act & Assert
         mockMvc.perform(get("/api/patients"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
@@ -142,10 +131,8 @@ class PatientControllerTest {
 
     @Test
     void testGetAllPatients_EmptyList() throws Exception {
-        // Arrange
         when(patientService.getAllPatients()).thenReturn(Arrays.asList());
 
-        // Act & Assert
         mockMvc.perform(get("/api/patients"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(0)));
@@ -155,7 +142,6 @@ class PatientControllerTest {
 
     @Test
     void testUpdatePatient_Success() throws Exception {
-        // Arrange
         PatientDTO updatedPatient = new PatientDTO(
                 1L, "Anna", "Andersson-Berg", "19900101-1234",
                 LocalDate.of(1990, 1, 1), "anna.berg@example.com",
@@ -164,8 +150,6 @@ class PatientControllerTest {
 
         when(patientService.updatePatient(eq(1L), any(PatientDTO.class)))
                 .thenReturn(updatedPatient);
-
-        // Act & Assert
         mockMvc.perform(put("/api/patients/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updatedPatient)))
@@ -179,11 +163,9 @@ class PatientControllerTest {
 
     @Test
     void testUpdatePatient_NotFound() throws Exception {
-        // Arrange
         when(patientService.updatePatient(eq(999L), any(PatientDTO.class)))
                 .thenThrow(new RuntimeException("Patient med ID 999 finns inte"));
 
-        // Act & Assert
         mockMvc.perform(put("/api/patients/999")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(testPatientDTO)))
@@ -194,10 +176,8 @@ class PatientControllerTest {
 
     @Test
     void testDeletePatient_Success() throws Exception {
-        // Arrange
         doNothing().when(patientService).deletePatient(1L);
 
-        // Act & Assert
         mockMvc.perform(delete("/api/patients/1"))
                 .andExpect(status().isNoContent());
 
@@ -206,11 +186,9 @@ class PatientControllerTest {
 
     @Test
     void testDeletePatient_NotFound() throws Exception {
-        // Arrange
         doThrow(new RuntimeException("Patient med ID 999 finns inte"))
                 .when(patientService).deletePatient(999L);
 
-        // Act & Assert
         mockMvc.perform(delete("/api/patients/999"))
                 .andExpect(status().isNotFound());
 
