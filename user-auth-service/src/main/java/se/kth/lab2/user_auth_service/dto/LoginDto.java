@@ -1,9 +1,0 @@
-package se.kth.lab2.user_auth_service.dto;
-
-import lombok.Data;
-
-@Data
-public class LoginDto {
-    private String username;
-    private String password;
-}
