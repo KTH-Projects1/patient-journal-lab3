@@ -1,0 +1,5 @@
+se\kth\lab3\user_auth_service\service\UserServiceTest.class
+se\kth\lab3\user_auth_service\service\CustomUserDetailsService.class
+se\kth\lab3\user_auth_service\config\TestExceptionHandler.class
+se\kth\lab3\user_auth_service\controller\AuthControllerTest.class
+se\kth\lab3\user_auth_service\config\TestSecurityConfig.class

@@ -1,0 +1,11 @@
+C:\patient-journal-lab3\user-auth-service\src\main\java\se\kth\lab3\user_auth_service\controller\AuthController.java
+C:\patient-journal-lab3\user-auth-service\src\main\java\se\kth\lab3\user_auth_service\dto\AuthResponseDto.java
+C:\patient-journal-lab3\user-auth-service\src\main\java\se\kth\lab3\user_auth_service\dto\LoginDto.java
+C:\patient-journal-lab3\user-auth-service\src\main\java\se\kth\lab3\user_auth_service\dto\RegisterDto.java
+C:\patient-journal-lab3\user-auth-service\src\main\java\se\kth\lab3\user_auth_service\entity\Role.java
+C:\patient-journal-lab3\user-auth-service\src\main\java\se\kth\lab3\user_auth_service\entity\User.java
+C:\patient-journal-lab3\user-auth-service\src\main\java\se\kth\lab3\user_auth_service\repository\UserRepository.java
+C:\patient-journal-lab3\user-auth-service\src\main\java\se\kth\lab3\user_auth_service\security\CustomUserDetailsService.java
+C:\patient-journal-lab3\user-auth-service\src\main\java\se\kth\lab3\user_auth_service\security\JwtTokenProvider.java
+C:\patient-journal-lab3\user-auth-service\src\main\java\se\kth\lab3\user_auth_service\security\SecurityConfig.java
+C:\patient-journal-lab3\user-auth-service\src\main\java\se\kth\lab3\user_auth_service\UserAuthServiceApplication.java

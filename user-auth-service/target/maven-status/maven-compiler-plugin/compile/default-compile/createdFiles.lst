@@ -1,0 +1,11 @@
+se\kth\lab3\user_auth_service\dto\AuthResponseDto.class
+se\kth\lab3\user_auth_service\entity\Role.class
+se\kth\lab3\user_auth_service\dto\LoginDto.class
+se\kth\lab3\user_auth_service\entity\User.class
+se\kth\lab3\user_auth_service\security\JwtTokenProvider.class
+se\kth\lab3\user_auth_service\UserAuthServiceApplication.class
+se\kth\lab3\user_auth_service\repository\UserRepository.class
+se\kth\lab3\user_auth_service\controller\AuthController.class
+se\kth\lab3\user_auth_service\dto\RegisterDto.class
+se\kth\lab3\user_auth_service\security\SecurityConfig.class
+se\kth\lab3\user_auth_service\security\CustomUserDetailsService.class
